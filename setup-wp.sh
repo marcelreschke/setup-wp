@@ -2,10 +2,9 @@
 
 printf 'In which folder should we install WordPress? '
 read NEWDIR
-mkdir $NEWDIR
-cd $NEWDIR
-mkdir public_html
-cd public_html
+mkdir /var/www/$NEWDIR
+mkdir /var/www/$NEWDIR/public_html
+cd /var/www/$NEWDIR/public_html
 pwd
 
 MYSQLPASS=$(makepasswd --chars 12)
@@ -21,3 +20,27 @@ wp core install --url=$wpurl --title=$NEWDIR --admin_name=mreschke --admin_email
 wp option update permalink_structure /%postname%/ --allow-root
 
 find . -exec chown www-data:www-data {} \;
+
+cat <<EOF >/etc/nginx/sites-available/$NEWDIR
+server {
+        listen 80;
+
+        root /var/www/$NEWDIR/public_html;
+        index index.html index.htm index.php;
+
+        # Make site accessible from http://localhost/
+        server_name $wpurl;
+        include hhvm.conf;
+
+        location / {
+                try_files $uri $uri/ /index.php?$args;
+        }
+}
+EOF
+
+ln -s /etc/nginx/sites-available/$NEWDIR /etc/nginx/sites-enabled/$NEWDIR
+service nginx restart
+
+printf "Access Data for http://$wpurl"
+printf "Username: mreschke"
+printf "Pass: $MYSQLPASS"
