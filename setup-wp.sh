@@ -33,7 +33,7 @@ server {
         include hhvm.conf;
 
         location / {
-                try_files $uri $uri/ /index.php?$args;
+                try_files \$uri \$uri/ /index.php?\$args;
         }
 }
 EOF
@@ -41,6 +41,6 @@ EOF
 ln -s /etc/nginx/sites-available/$NEWDIR /etc/nginx/sites-enabled/$NEWDIR
 service nginx restart
 
-printf "Access Data for http://$wpurl"
-printf "Username: mreschke"
-printf "Pass: $MYSQLPASS"
+printf "Access Data for http://$wpurl\n"
+printf "Username: mreschke\n"
+printf "Pass: $MYSQLPASS\n"
